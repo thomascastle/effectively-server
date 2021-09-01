@@ -419,8 +419,20 @@ const resolvers = {
       return milestone;
     },
 
-    milestones: async () => {
-      const milestones = await Milestone.find().exec();
+    milestones: async (_, { states }) => {
+      const filters = {};
+
+      if (states) {
+        const stateFilters = states.map((s) => {
+          if (s === "CLOSED") {
+            return true;
+          }
+          return false;
+        });
+        filters.closed = { $in: stateFilters };
+      }
+
+      const milestones = await Milestone.find(filters).exec();
 
       return milestones;
     },

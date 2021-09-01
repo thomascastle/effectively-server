@@ -37,7 +37,7 @@ const typeDefs = gql`
 
     milestone(number: Int!): Milestone
 
-    milestones: [Milestone]
+    milestones(states: [MilestoneState!]): [Milestone]
 
     users: [User]
   }
