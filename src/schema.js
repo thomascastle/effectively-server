@@ -17,6 +17,8 @@ const typeDefs = gql`
 
     deleteMilestone(id: ID!): DeleteMilestoneResponse
 
+    reopenMilestone(id: ID!): ReopenMilestoneResponse
+
     updateIssue(input: UpdateIssueInput): UpdateIssueResponse
 
     updateLabel(input: UpdateLabelInput): UpdateLabelResponse
@@ -162,6 +164,12 @@ const typeDefs = gql`
     state: MilestoneState!
     title: String!
     updatedAt: DateTime
+  }
+
+  type ReopenMilestoneResponse {
+    message: String!
+    success: Boolean!
+    milestone: Milestone
   }
 
   type UpdateIssueResponse {

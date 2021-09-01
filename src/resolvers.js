@@ -245,6 +245,37 @@ const resolvers = {
       }
     },
 
+    reopenMilestone: async (_, { id }) => {
+      try {
+        const milestone = await Milestone.findById(id).exec();
+
+        if (milestone) {
+          milestone.closed = false;
+          milestone.closedAt = null;
+
+          const reopenedMilestone = await milestone.save();
+
+          return {
+            message: "The milestone has been reopened.",
+            success: true,
+            milestone: reopenedMilestone,
+          };
+        } else {
+          return {
+            message: "The milestone you were looking for could not be found.",
+            success: false,
+            milestone: null,
+          };
+        }
+      } catch (error) {
+        return {
+          message: error.message,
+          success: false,
+          milestone: null,
+        };
+      }
+    },
+
     updateIssue: async (_, { input: { id, ...rest } }) => {
       try {
         const issue = await Issue.findById(id).exec();
