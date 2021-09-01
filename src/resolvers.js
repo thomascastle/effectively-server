@@ -40,7 +40,44 @@ const resolvers = {
     },
   },
 
+  Milestone: {
+    state: ({ closed }) => {
+      return closed ? "CLOSED" : "OPEN";
+    },
+  },
+
   Mutation: {
+    closeMilestone: async (_, { id }) => {
+      try {
+        const milestone = await Milestone.findById(id).exec();
+
+        if (milestone) {
+          milestone.closed = true;
+          milestone.closedAt = new Date();
+
+          const closedMilestone = await milestone.save();
+
+          return {
+            message: "The milestone has been closed.",
+            success: true,
+            milestone: closedMilestone,
+          };
+        } else {
+          return {
+            message: "The milestone you were looking for could not be found.",
+            success: false,
+            milestone: null,
+          };
+        }
+      } catch (error) {
+        return {
+          message: error.message,
+          success: false,
+          milestone: null,
+        };
+      }
+    },
+
     createIssue: async (_, { input }) => {
       const sequenceNumber = await SequenceNumber.findOne({
         entity: "issue",
