@@ -410,7 +410,7 @@ const resolvers = {
     labels: async () => {
       const labels = await Label.find().exec();
 
-      return labels;
+      return { nodes: labels, totalCount: labels.length };
     },
 
     milestone: async (_, { number }) => {
@@ -435,8 +435,8 @@ const resolvers = {
       const milestones = await Milestone.find(filters).exec();
 
       return {
-        totalCount: milestones.length,
         nodes: milestones,
+        totalCount: milestones.length,
       };
     },
 

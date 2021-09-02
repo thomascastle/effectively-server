@@ -33,7 +33,7 @@ const typeDefs = gql`
 
     label(name: String!): Label
 
-    labels: [Label]
+    labels: LabelConnection
 
     milestone(number: Int!): Milestone
 
@@ -151,6 +151,11 @@ const typeDefs = gql`
     description: String
     id: ID!
     name: String!
+  }
+
+  type LabelConnection {
+    nodes: [Label]
+    totalCount: Int!
   }
 
   type Milestone {
