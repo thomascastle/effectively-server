@@ -37,7 +37,7 @@ const typeDefs = gql`
 
     milestone(number: Int!): Milestone
 
-    milestones(states: [MilestoneState!]): [Milestone]
+    milestones(states: [MilestoneState!]): MilestoneConnection
 
     users: [User]
   }
@@ -164,6 +164,11 @@ const typeDefs = gql`
     state: MilestoneState!
     title: String!
     updatedAt: DateTime
+  }
+
+  type MilestoneConnection {
+    nodes: [Milestone]
+    totalCount: Int!
   }
 
   type ReopenMilestoneResponse {

@@ -434,7 +434,10 @@ const resolvers = {
 
       const milestones = await Milestone.find(filters).exec();
 
-      return milestones;
+      return {
+        totalCount: milestones.length,
+        nodes: milestones,
+      };
     },
 
     users: async () => {
