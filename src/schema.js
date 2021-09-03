@@ -3,6 +3,8 @@ const { gql } = require("apollo-server");
 const typeDefs = gql`
   "-- Default types --"
   type Mutation {
+    closeIssue(id: ID!): CloseIssueResponse
+
     closeMilestone(id: ID!): CloseMilestoneResponse
 
     createIssue(input: CreateIssueInput): CreateIssueResponse
@@ -93,6 +95,12 @@ const typeDefs = gql`
 
   scalar DateTime
 
+  type CloseIssueResponse {
+    message: String!
+    success: Boolean!
+    issue: Issue
+  }
+
   type CloseMilestoneResponse {
     message: String!
     success: Boolean!
@@ -135,6 +143,8 @@ const typeDefs = gql`
   type Issue {
     assignees: [User]
     body: String
+    closed: Boolean!
+    closedAt: DateTime
     createdAt: DateTime!
     createdBy: User!
     id: ID!

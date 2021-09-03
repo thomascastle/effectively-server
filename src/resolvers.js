@@ -47,6 +47,37 @@ const resolvers = {
   },
 
   Mutation: {
+    closeIssue: async (_, { id }) => {
+      try {
+        const issue = await Issue.findById(id).exec();
+
+        if (issue) {
+          issue.closed = true;
+          issue.closedAt = new Date();
+
+          const closedIssue = await issue.save();
+
+          return {
+            message: "The issue has been closed.",
+            success: true,
+            issue: closedIssue,
+          };
+        } else {
+          return {
+            message: "The issue you were looking for could not be found.",
+            success: false,
+            issue: null,
+          };
+        }
+      } catch (error) {
+        return {
+          message: error.message,
+          success: false,
+          issue: null,
+        };
+      }
+    },
+
     closeMilestone: async (_, { id }) => {
       try {
         const milestone = await Milestone.findById(id).exec();
@@ -87,6 +118,9 @@ const resolvers = {
         const issue = await Issue.create({
           assignees: input.assigneeIds ? [...input.assigneeIds] : [],
           body: input.body ? input.body : null,
+          closed: false,
+          // TODO closedAt should be null by default
+          // closedAt: null
           labels: input.labelIds ? [...input.labelIds] : [],
           milestone: input.milestoneId ? input.milestoneId : null,
           number: sequenceNumber.value,
