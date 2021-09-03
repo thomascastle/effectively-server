@@ -10,7 +10,6 @@ const schema = new mongoose.Schema(
     labels: [{ ref: "Label", type: mongoose.SchemaTypes.ObjectId }],
     milestone: { ref: "Milestone", type: mongoose.SchemaTypes.ObjectId },
     number: Number,
-    status: String,
     title: { required: true, type: String },
   },
   {

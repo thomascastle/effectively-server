@@ -31,7 +31,7 @@ const typeDefs = gql`
   type Query {
     issue(number: Int!): Issue
 
-    issues: [Issue]
+    issues(states: [IssueState!]): IssueConnection
 
     label(name: String!): Label
 
@@ -45,6 +45,11 @@ const typeDefs = gql`
   }
 
   "-- Application types --"
+  enum IssueState {
+    CLOSED
+    OPEN
+  }
+
   enum MilestoneState {
     CLOSED
     OPEN
@@ -151,9 +156,14 @@ const typeDefs = gql`
     labels: [Label]
     milestone: Milestone
     number: Int!
-    status: String!
+    state: IssueState!
     title: String!
     updatedAt: DateTime!
+  }
+
+  type IssueConnection {
+    nodes: [Issue]
+    totalCount: Int!
   }
 
   type Label {

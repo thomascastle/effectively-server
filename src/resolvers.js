@@ -38,6 +38,10 @@ const resolvers = {
 
       return milestone;
     },
+
+    state: ({ closed }) => {
+      return closed ? "CLOSED" : "OPEN";
+    },
   },
 
   Milestone: {
@@ -124,7 +128,6 @@ const resolvers = {
           labels: input.labelIds ? [...input.labelIds] : [],
           milestone: input.milestoneId ? input.milestoneId : null,
           number: sequenceNumber.value,
-          status: "open",
           title: input.title,
         });
 
@@ -430,10 +433,25 @@ const resolvers = {
       return issue;
     },
 
-    issues: async () => {
-      const issues = await Issue.find().exec();
+    issues: async (_, { states }) => {
+      const filters = {};
 
-      return issues;
+      if (states) {
+        const stateFilters = states.map((s) => {
+          if (s === "CLOSED") {
+            return true;
+          }
+          return false;
+        });
+        filters.closed = { $in: stateFilters };
+      }
+
+      const issues = await Issue.find(filters).exec();
+
+      return {
+        nodes: issues,
+        totalCount: issues.length,
+      };
     },
 
     label: async (_, { name }) => {
