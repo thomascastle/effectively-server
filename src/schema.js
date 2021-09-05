@@ -35,7 +35,7 @@ const typeDefs = gql`
 
     label(name: String!): Label
 
-    labels: LabelConnection
+    labels(after: String, first: Int): LabelConnection
 
     milestone(number: Int!): Milestone
 
@@ -167,15 +167,24 @@ const typeDefs = gql`
   }
 
   type Label {
+    createdAt: DateTime
     color: String!
     description: String
     id: ID!
     name: String!
+    updatedAt: DateTime
   }
 
   type LabelConnection {
+    edges: [LabelEdge]
     nodes: [Label]
+    pageInfo: PageInfo!
     totalCount: Int!
+  }
+
+  type LabelEdge {
+    cursor: String!
+    node: Label
   }
 
   type Milestone {
@@ -194,6 +203,13 @@ const typeDefs = gql`
   type MilestoneConnection {
     nodes: [Milestone]
     totalCount: Int!
+  }
+
+  type PageInfo {
+    endCursor: String
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
   }
 
   type ReopenMilestoneResponse {
