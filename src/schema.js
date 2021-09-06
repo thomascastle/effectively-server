@@ -35,7 +35,7 @@ const typeDefs = gql`
 
     label(name: String!): Label
 
-    labels(after: String, first: Int): LabelConnection
+    labels(after: String, before: String, first: Int): LabelConnection
 
     milestone(number: Int!): Milestone
 

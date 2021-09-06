@@ -459,7 +459,7 @@ const resolvers = {
 
       return label;
     },
-    labels: async (_, { after, first }) => {
+    labels: async (_, { after, before, first }) => {
       const limit = first !== null && first !== undefined ? first : 10;
 
       // TODO Find the most efficient way to do it
@@ -476,12 +476,16 @@ const resolvers = {
         []
       );
 
-      const startIndex = cursorBasedLabels.findIndex((l) => l.cursor === after);
+      const startIndex = before
+        ? cursorBasedLabels.findIndex((l) => l.cursor === before)
+        : cursorBasedLabels.findIndex((l) => l.cursor === after);
 
-      const limitedLabels = cursorBasedLabels.slice(
-        startIndex !== -1 ? startIndex + 1 : 0,
-        startIndex !== -1 ? limit + startIndex + 1 : limit
-      );
+      const limitedLabels = before
+        ? cursorBasedLabels.slice(startIndex - limit, startIndex)
+        : cursorBasedLabels.slice(
+            startIndex !== -1 ? startIndex + 1 : 0,
+            startIndex !== -1 ? limit + startIndex + 1 : limit
+          );
 
       const indexEndCursor = allLabels.findIndex(
         (label) => label.name === limitedLabels[limitedLabels.length - 1].cursor
@@ -492,10 +496,12 @@ const resolvers = {
 
       return {
         edges: limitedLabels,
-        nodes: allLabels.slice(
-          startIndex !== -1 ? startIndex + 1 : 0,
-          startIndex !== -1 ? limit + startIndex + 1 : limit
-        ),
+        nodes: before
+          ? allLabels.slice(startIndex - limit, startIndex)
+          : allLabels.slice(
+              startIndex !== -1 ? startIndex + 1 : 0,
+              startIndex !== -1 ? limit + startIndex + 1 : limit
+            ),
         pageInfo: {
           endCursor: limitedLabels[limitedLabels.length - 1].cursor,
           hasNextPage: !!allLabels[indexEndCursor + 1],
