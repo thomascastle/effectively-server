@@ -433,7 +433,8 @@ const resolvers = {
       return issue;
     },
 
-    issues: async (_, { states }) => {
+    issues: async (_, { after, before, first, states }) => {
+      const limit = first !== null && first !== undefined ? first : 10;
       const filters = {};
 
       if (states) {
@@ -446,11 +447,53 @@ const resolvers = {
         filters.closed = { $in: stateFilters };
       }
 
-      const issues = await Issue.find(filters).exec();
+      const filteredIssues = await Issue.find(filters).exec();
+
+      const cursorBasedIssues = filteredIssues.reduce(
+        (edges, issue) => [
+          ...edges,
+          {
+            cursor: issue.number,
+            node: issue,
+          },
+        ],
+        []
+      );
+
+      const startIndex = before
+        ? cursorBasedIssues.findIndex((i) => i.cursor.toString() === before)
+        : cursorBasedIssues.findIndex((i) => i.cursor.toString() === after);
+
+      const limitedIssues = before
+        ? cursorBasedIssues.slice(startIndex - limit, startIndex)
+        : cursorBasedIssues.slice(
+            startIndex !== -1 ? startIndex + 1 : 0,
+            startIndex !== -1 ? limit + startIndex + 1 : limit
+          );
+
+      const indexEndCursor = filteredIssues.findIndex(
+        (issue) =>
+          issue.number === limitedIssues[limitedIssues.length - 1].cursor
+      );
+      const indexStartCursor = filteredIssues.findIndex(
+        (issue) => issue.number === limitedIssues[0].cursor
+      );
 
       return {
-        nodes: issues,
-        totalCount: issues.length,
+        edges: limitedIssues,
+        nodes: before
+          ? filteredIssues.slice(startIndex - limit, startIndex)
+          : filteredIssues.slice(
+              startIndex !== -1 ? startIndex + 1 : 0,
+              startIndex !== -1 ? limit + startIndex + 1 : limit
+            ),
+        pageInfo: {
+          endCursor: limitedIssues[limitedIssues.length - 1].cursor,
+          hasNextPage: !!filteredIssues[indexEndCursor + 1],
+          hasPreviousPage: !!filteredIssues[indexStartCursor - 1],
+          startCursor: limitedIssues[0].cursor,
+        },
+        totalCount: filteredIssues.length,
       };
     },
 

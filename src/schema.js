@@ -31,7 +31,12 @@ const typeDefs = gql`
   type Query {
     issue(number: Int!): Issue
 
-    issues(states: [IssueState!]): IssueConnection
+    issues(
+      after: String
+      before: String
+      first: Int
+      states: [IssueState!]
+    ): IssueConnection
 
     label(name: String!): Label
 
@@ -167,8 +172,15 @@ const typeDefs = gql`
   }
 
   type IssueConnection {
+    edges: [IssueEdge]
     nodes: [Issue]
+    pageInfo: PageInfo!
     totalCount: Int!
+  }
+
+  type IssueEdge {
+    cursor: String!
+    node: Issue
   }
 
   type Label {
