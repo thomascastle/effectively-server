@@ -39,7 +39,12 @@ const typeDefs = gql`
 
     milestone(number: Int!): Milestone
 
-    milestones(states: [MilestoneState!]): MilestoneConnection
+    milestones(
+      after: String
+      before: String
+      first: Int
+      states: [MilestoneState!]
+    ): MilestoneConnection
 
     users: [User]
   }
@@ -201,8 +206,15 @@ const typeDefs = gql`
   }
 
   type MilestoneConnection {
+    edges: [MilestoneEdge]
     nodes: [Milestone]
+    pageInfo: PageInfo!
     totalCount: Int!
+  }
+
+  type MilestoneEdge {
+    cursor: String!
+    node: Milestone
   }
 
   type PageInfo {
