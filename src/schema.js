@@ -19,7 +19,11 @@ const typeDefs = gql`
 
     deleteMilestone(id: ID!): DeleteMilestoneResponse
 
+    login(input: LogInInput): AuthPayload
+
     reopenMilestone(id: ID!): ReopenMilestoneResponse
+
+    signup(input: SignUpInput): AuthPayload
 
     updateIssue(input: UpdateIssueInput): UpdateIssueResponse
 
@@ -85,6 +89,17 @@ const typeDefs = gql`
     title: String!
   }
 
+  input LogInInput {
+    email: String!
+    password: String!
+  }
+
+  input SignUpInput {
+    email: String!
+    password: String!
+    name: String
+  }
+
   input UpdateIssueInput {
     assigneeIds: [ID!]
     body: String
@@ -109,6 +124,11 @@ const typeDefs = gql`
   }
 
   scalar DateTime
+
+  type AuthPayload {
+    token: String
+    user: User
+  }
 
   type CloseIssueResponse {
     message: String!
@@ -261,6 +281,7 @@ const typeDefs = gql`
   }
 
   type User {
+    email: String
     id: ID!
     name: String
     username: String!

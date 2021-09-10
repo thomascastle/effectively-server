@@ -1,9 +1,13 @@
+const { APP_SECRET } = require("./auth/config");
 const Issue = require("./models/Issue");
 const Label = require("./models/Label");
 const Milestone = require("./models/Milestone");
 const User = require("./models/User");
 const SequenceNumber = require("./models/SequenceNumber");
+const { AuthenticationError } = require("apollo-server");
 const { GraphQLScalarType } = require("graphql");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const dateTimeScalar = new GraphQLScalarType({
   name: "DateTime",
@@ -51,7 +55,13 @@ const resolvers = {
   },
 
   Mutation: {
-    closeIssue: async (_, { id }) => {
+    closeIssue: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const issue = await Issue.findById(id).exec();
 
@@ -82,7 +92,13 @@ const resolvers = {
       }
     },
 
-    closeMilestone: async (_, { id }) => {
+    closeMilestone: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const milestone = await Milestone.findById(id).exec();
 
@@ -113,7 +129,13 @@ const resolvers = {
       }
     },
 
-    createIssue: async (_, { input }) => {
+    createIssue: async (_, { input }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const sequenceNumber = await SequenceNumber.findOne({
         entity: "issue",
       }).exec();
@@ -123,6 +145,7 @@ const resolvers = {
           assignees: input.assigneeIds ? [...input.assigneeIds] : [],
           body: input.body ? input.body : null,
           closed: false,
+          createdBy: user.id,
           // TODO closedAt should be null by default
           // closedAt: null
           labels: input.labelIds ? [...input.labelIds] : [],
@@ -151,7 +174,13 @@ const resolvers = {
       }
     },
 
-    createLabel: async (_, { input }) => {
+    createLabel: async (_, { input }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const label = await Label.create({
           color: input.color,
@@ -173,7 +202,13 @@ const resolvers = {
       }
     },
 
-    createMilestone: async (_, { input }) => {
+    createMilestone: async (_, { input }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const sequenceNumber = await SequenceNumber.findOne({
         entity: "milestone",
       }).exec();
@@ -207,7 +242,13 @@ const resolvers = {
       }
     },
 
-    deleteIssue: async (_, { id }) => {
+    deleteIssue: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const result = await Issue.deleteOne({ _id: id });
 
@@ -232,7 +273,13 @@ const resolvers = {
       }
     },
 
-    deleteLabel: async (_, { id }) => {
+    deleteLabel: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const result = await Label.deleteOne({ _id: id });
 
@@ -257,7 +304,13 @@ const resolvers = {
       }
     },
 
-    deleteMilestone: async (_, { id }) => {
+    deleteMilestone: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const result = await Milestone.deleteOne({ _id: id });
 
@@ -282,7 +335,36 @@ const resolvers = {
       }
     },
 
-    reopenMilestone: async (_, { id }) => {
+    login: async (_, { input }) => {
+      const { email, password } = input;
+
+      const user = await User.findOne({ email: email }).exec();
+
+      if (!user) {
+        throw new Error("No such user found");
+      }
+
+      const valid = await bcrypt.compare(password, user.password);
+
+      if (!valid) {
+        throw new Error("Invalid password");
+      }
+
+      const token = jwt.sign({ userId: user.id }, APP_SECRET);
+
+      return {
+        token,
+        user,
+      };
+    },
+
+    reopenMilestone: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const milestone = await Milestone.findById(id).exec();
 
@@ -313,7 +395,33 @@ const resolvers = {
       }
     },
 
-    updateIssue: async (_, { input: { id, ...rest } }) => {
+    signup: async (_, { input }) => {
+      const { email, name, password } = input;
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const user = await User.create({
+        email,
+        name,
+        password: hashedPassword,
+        username: email.split("@")[0],
+      });
+
+      const token = jwt.sign({ userId: user.id }, APP_SECRET);
+
+      return {
+        token,
+        user,
+      };
+    },
+
+    updateIssue: async (_, { input: { id, ...rest } }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const issue = await Issue.findById(id).exec();
 
@@ -355,7 +463,13 @@ const resolvers = {
       }
     },
 
-    updateLabel: async (_, { input: { id, ...rest } }) => {
+    updateLabel: async (_, { input: { id, ...rest } }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const label = await Label.findById(id).exec();
 
@@ -390,7 +504,13 @@ const resolvers = {
       }
     },
 
-    updateMilestone: async (_, { input: { id, ...rest } }) => {
+    updateMilestone: async (_, { input: { id, ...rest } }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       try {
         const milestone = await Milestone.findById(id).exec();
 
@@ -427,13 +547,25 @@ const resolvers = {
   },
 
   Query: {
-    issue: async (_, { number }) => {
+    issue: async (_, { number }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const issue = await Issue.findOne({ number: number }).exec();
 
       return issue;
     },
 
-    issues: async (_, { after, before, first, states }) => {
+    issues: async (_, { after, before, first, states }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const limit = first !== null && first !== undefined ? first : 10;
       const filters = {};
 
@@ -497,12 +629,25 @@ const resolvers = {
       };
     },
 
-    label: async (_, { name }) => {
+    label: async (_, { name }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const label = await Label.findOne({ name: name }).exec();
 
       return label;
     },
-    labels: async (_, { after, before, first }) => {
+
+    labels: async (_, { after, before, first }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const limit = first !== null && first !== undefined ? first : 10;
 
       // TODO Find the most efficient way to do it
@@ -555,13 +700,25 @@ const resolvers = {
       };
     },
 
-    milestone: async (_, { number }) => {
+    milestone: async (_, { number }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const milestone = await Milestone.findOne({ number: number }).exec();
 
       return milestone;
     },
 
-    milestones: async (_, { after, before, first, states }) => {
+    milestones: async (_, { after, before, first, states }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const limit = first !== null && first !== undefined ? first : 10;
       const filters = {};
 
@@ -626,7 +783,13 @@ const resolvers = {
       };
     },
 
-    users: async () => {
+    users: async (parent, args, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
       const users = await User.find().exec();
 
       return users;

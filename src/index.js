@@ -1,6 +1,7 @@
-const typeDefs = require("./schema");
+const { getUser } = require("./auth/utils");
 const resolvers = require("./resolvers");
-const { ApolloServer } = require("apollo-server");
+const typeDefs = require("./schema");
+const { ApolloServer, AuthenticationError } = require("apollo-server");
 const mongoose = require("mongoose");
 
 mongoose.connect("mongodb://localhost:27017/effectively", {
@@ -9,8 +10,25 @@ mongoose.connect("mongodb://localhost:27017/effectively", {
 });
 
 const server = new ApolloServer({
-  typeDefs,
+  context: async ({ req }) => {
+    const token = req.headers.authorization || "";
+    const user = await getUser(token);
+
+    return { user };
+  },
+  formatError(err) {
+    if (err.originalError instanceof AuthenticationError) {
+      return {
+        message: err.message,
+      };
+    }
+
+    return {
+      message: err.message,
+    };
+  },
   resolvers,
+  typeDefs,
 });
 
 server.listen().then(() => {
