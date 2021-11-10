@@ -396,15 +396,14 @@ const resolvers = {
     },
 
     signup: async (_, { input }) => {
-      const { email, name, password } = input;
+      const { email, password, username } = input;
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const user = await User.create({
         email,
-        name,
         password: hashedPassword,
-        username: email.split("@")[0],
+        username,
       });
 
       const token = jwt.sign({ userId: user.id }, APP_SECRET);

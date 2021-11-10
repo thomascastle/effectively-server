@@ -31,6 +31,8 @@ const server = new ApolloServer({
   typeDefs,
 });
 
-server.listen().then(() => {
-  console.log(`Server is running at http://localhost:4000`);
+const port = process.env.PORT || 4000;
+
+server.listen({ port }).then(() => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
