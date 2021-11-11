@@ -2,6 +2,7 @@ const { APP_SECRET } = require("./auth/config");
 const Issue = require("./models/Issue");
 const Label = require("./models/Label");
 const Milestone = require("./models/Milestone");
+const Repository = require("./models/Repository");
 const User = require("./models/User");
 const SequenceNumber = require("./models/SequenceNumber");
 const { AuthenticationError } = require("apollo-server");
@@ -239,6 +240,35 @@ const resolvers = {
           { entity: "milestone" },
           { $inc: { value: 1 } }
         );
+      }
+    },
+
+    createRepository: async (_, { input }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      try {
+        const repository = await Repository.create({
+          description: input.description ? input.description : null,
+          name: input.name,
+          ownerId: input.ownerId ? input.ownerId : user.id,
+          visibility: input.visibility,
+        });
+
+        return {
+          message: "A new repository has been created.",
+          repository,
+          success: true,
+        };
+      } catch (error) {
+        return {
+          message: error.message,
+          repository: null,
+          success: false,
+        };
       }
     },
 

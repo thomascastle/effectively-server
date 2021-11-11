@@ -13,6 +13,8 @@ const typeDefs = gql`
 
     createMilestone(input: CreateMilestoneInput): CreateMilestoneResponse
 
+    createRepository(input: CreateRepositoryInput): CreateRepositoryPayload
+
     deleteIssue(id: ID!): DeleteIssueResponse
 
     deleteLabel(id: ID!): DeleteLabelResponse
@@ -71,6 +73,11 @@ const typeDefs = gql`
     OPEN
   }
 
+  enum RepositoryVisibility {
+    PRIVATE
+    PUBLIC
+  }
+
   input CreateIssueInput {
     assigneeIds: [ID!]
     body: String
@@ -89,6 +96,13 @@ const typeDefs = gql`
     description: String
     dueOn: DateTime
     title: String!
+  }
+
+  input CreateRepositoryInput {
+    description: String
+    name: String!
+    ownerId: ID
+    visibility: RepositoryVisibility!
   }
 
   input LogInInput {
@@ -123,6 +137,12 @@ const typeDefs = gql`
     dueOn: DateTime
     id: ID!
     title: String
+  }
+
+  interface RepositoryOwner {
+    login: String!
+    repositories: [Repository]
+    repository(name: String!): Repository
   }
 
   scalar DateTime
@@ -160,6 +180,12 @@ const typeDefs = gql`
     message: String!
     success: Boolean!
     milestone: Milestone
+  }
+
+  type CreateRepositoryPayload {
+    message: String!
+    repository: Repository
+    success: Boolean!
   }
 
   type DeleteIssueResponse {
@@ -264,6 +290,17 @@ const typeDefs = gql`
     milestone: Milestone
   }
 
+  type Repository {
+    createdAt: DateTime!
+    description: String
+    id: ID!
+    isPrivate: Boolean!
+    name: String!
+    owner: RepositoryOwner!
+    updatedAt: DateTime!
+    visibility: RepositoryVisibility!
+  }
+
   type UpdateIssueResponse {
     message: String!
     success: Boolean!
@@ -282,10 +319,13 @@ const typeDefs = gql`
     milestone: Milestone
   }
 
-  type User {
+  type User implements RepositoryOwner {
     email: String!
     id: ID!
+    login: String!
     name: String
+    repositories: [Repository]
+    repository(name: String!): Repository
     username: String!
   }
 `;
