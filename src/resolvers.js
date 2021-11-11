@@ -793,6 +793,16 @@ const resolvers = {
 
       return users;
     },
+
+    viewer: (parent, args, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      return user;
+    },
   },
 };
 

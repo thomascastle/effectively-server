@@ -56,6 +56,8 @@ const typeDefs = gql`
     ): MilestoneConnection
 
     users: [User]
+
+    viewer: User!
   }
 
   "-- Application types --"
@@ -281,7 +283,7 @@ const typeDefs = gql`
   }
 
   type User {
-    email: String
+    email: String!
     id: ID!
     name: String
     username: String!
