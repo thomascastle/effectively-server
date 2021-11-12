@@ -296,6 +296,7 @@ const typeDefs = gql`
     id: ID!
     isPrivate: Boolean!
     name: String!
+    nameWithOwner: String!
     owner: RepositoryOwner!
     updatedAt: DateTime!
     visibility: RepositoryVisibility!
@@ -326,7 +327,6 @@ const typeDefs = gql`
     name: String
     repositories: [Repository]
     repository(name: String!): Repository
-    username: String!
   }
 `;
 

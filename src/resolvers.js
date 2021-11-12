@@ -3,12 +3,13 @@ const Issue = require("./models/Issue");
 const Label = require("./models/Label");
 const Milestone = require("./models/Milestone");
 const Repository = require("./models/Repository");
-const User = require("./models/User");
 const SequenceNumber = require("./models/SequenceNumber");
+const User = require("./models/User");
 const { AuthenticationError } = require("apollo-server");
-const { GraphQLScalarType } = require("graphql");
 const bcrypt = require("bcrypt");
+const { GraphQLScalarType } = require("graphql");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 const dateTimeScalar = new GraphQLScalarType({
   name: "DateTime",
@@ -832,6 +833,45 @@ const resolvers = {
       }
 
       return user;
+    },
+  },
+
+  Repository: {
+    isPrivate: ({ visibility }) => {
+      return "PRIVATE" === visibility;
+    },
+
+    nameWithOwner: async ({ name, ownerId }) => {
+      const owner = await User.findById(ownerId);
+
+      return owner.username + "/" + name;
+    },
+
+    owner: async ({ ownerId }) => {
+      const owner = await User.findById(ownerId);
+
+      return owner;
+    },
+  },
+
+  RepositoryOwner: {
+    __resolveType() {
+      // Type `User` is the only type that implements RepositoryOwner
+      return "User";
+    },
+  },
+
+  User: {
+    login: ({ username }) => {
+      return username;
+    },
+
+    repositories: async ({ id }) => {
+      const repositories = await Repository.find({
+        ownerId: mongoose.Types.ObjectId(id),
+      });
+
+      return repositories;
     },
   },
 };
