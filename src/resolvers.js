@@ -866,6 +866,15 @@ const resolvers = {
       return username;
     },
 
+    repository: async ({ id }, { name }) => {
+      const repository = await Repository.findOne({
+        name: name,
+        ownerId: mongoose.Types.ObjectId(id),
+      });
+
+      return repository;
+    },
+
     repositories: async ({ id }) => {
       const repositories = await Repository.find({
         ownerId: mongoose.Types.ObjectId(id),
