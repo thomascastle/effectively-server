@@ -85,6 +85,7 @@ const typeDefs = gql`
     body: String
     labelIds: [ID!]
     milestoneId: ID
+    repositoryId: ID!
     title: String!
   }
 
@@ -304,6 +305,12 @@ const typeDefs = gql`
       states: [IssueState!]
     ): IssueConnection
     labels(after: String, before: String, first: Int): LabelConnection
+    milestones(
+      after: String
+      before: String
+      first: Int
+      states: [MilestoneState!]
+    ): MilestoneConnection
     name: String!
     nameWithOwner: String!
     owner: RepositoryOwner!

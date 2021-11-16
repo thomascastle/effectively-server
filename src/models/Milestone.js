@@ -7,6 +7,11 @@ const schema = new mongoose.Schema(
     description: String,
     dueOn: Date,
     number: { required: true, type: Number },
+    repositoryId: {
+      ref: "Repository",
+      required: true,
+      type: mongoose.SchemaTypes.ObjectId,
+    },
     title: { required: true, type: String },
   },
   {
