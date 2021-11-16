@@ -295,6 +295,12 @@ const typeDefs = gql`
     description: String
     id: ID!
     isPrivate: Boolean!
+    issues(
+      after: String
+      before: String
+      first: Int
+      states: [IssueState!]
+    ): IssueConnection
     name: String!
     nameWithOwner: String!
     owner: RepositoryOwner!
