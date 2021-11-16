@@ -915,6 +915,71 @@ const resolvers = {
       };
     },
 
+    labels: async ({ id }, { after, before, first }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      const limit = first !== null && first !== undefined ? first : 10;
+
+      // TODO Find the most efficient way to do it
+      const allLabels = await Label.find({
+        repositoryId: mongoose.Types.ObjectId(id),
+      });
+
+      const cursorBasedLabels = allLabels.reduce(
+        (edges, label) => [
+          ...edges,
+          {
+            cursor: label.name,
+            node: label,
+          },
+        ],
+        []
+      );
+
+      const startIndex = before
+        ? cursorBasedLabels.findIndex((l) => l.cursor === before)
+        : cursorBasedLabels.findIndex((l) => l.cursor === after);
+
+      const limitedLabels = before
+        ? cursorBasedLabels.slice(startIndex - limit, startIndex)
+        : cursorBasedLabels.slice(
+            startIndex !== -1 ? startIndex + 1 : 0,
+            startIndex !== -1 ? limit + startIndex + 1 : limit
+          );
+
+      const indexEndCursor = allLabels.findIndex(
+        (label) => label.name === limitedLabels[limitedLabels.length - 1].cursor
+      );
+      const indexStartCursor = allLabels.findIndex(
+        (label) => label.name === limitedLabels[0].cursor
+      );
+
+      return {
+        edges: limitedLabels,
+        nodes: before
+          ? allLabels.slice(startIndex - limit, startIndex)
+          : allLabels.slice(
+              startIndex !== -1 ? startIndex + 1 : 0,
+              startIndex !== -1 ? limit + startIndex + 1 : limit
+            ),
+        pageInfo: {
+          endCursor:
+            limitedLabels.length > 0
+              ? limitedLabels[limitedLabels.length - 1].cursor
+              : null,
+          hasNextPage: !!allLabels[indexEndCursor + 1],
+          hasPreviousPage: !!allLabels[indexStartCursor - 1],
+          startCursor:
+            limitedLabels.length > 0 ? limitedLabels[0].cursor : null,
+        },
+        totalCount: allLabels.length,
+      };
+    },
+
     nameWithOwner: async ({ name, ownerId }) => {
       const owner = await User.findById(ownerId);
 

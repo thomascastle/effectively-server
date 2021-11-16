@@ -301,6 +301,7 @@ const typeDefs = gql`
       first: Int
       states: [IssueState!]
     ): IssueConnection
+    labels(after: String, before: String, first: Int): LabelConnection
     name: String!
     nameWithOwner: String!
     owner: RepositoryOwner!
