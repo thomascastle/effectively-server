@@ -57,6 +57,8 @@ const typeDefs = gql`
       states: [MilestoneState!]
     ): MilestoneConnection
 
+    repository(name: String!, owner: String!): Repository
+
     users: [User]
 
     viewer: User!

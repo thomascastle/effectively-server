@@ -813,6 +813,35 @@ const resolvers = {
       };
     },
 
+    repository: async (_, { name, owner }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      const ownerUser = await User.findOne({ username: owner });
+
+      if (!ownerUser) {
+        throw new Error(
+          `Could not resolve to a Repository with the name '${owner}/${name}'.`
+        );
+      }
+
+      const repository = await Repository.findOne({
+        name,
+        ownerId: mongoose.Types.ObjectId(ownerUser.id),
+      });
+
+      if (!repository) {
+        throw new Error(
+          `Could not resolve to a Repository with the name '${owner}/${name}'.`
+        );
+      }
+
+      return repository;
+    },
+
     users: async (parent, args, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";
