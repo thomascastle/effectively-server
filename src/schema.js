@@ -298,6 +298,7 @@ const typeDefs = gql`
     description: String
     id: ID!
     isPrivate: Boolean!
+    issue(number: Int!): Issue
     issues(
       after: String
       before: String

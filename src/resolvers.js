@@ -871,6 +871,21 @@ const resolvers = {
       return "PRIVATE" === visibility;
     },
 
+    issue: async ({ id }, { number }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      const issue = await Issue.findOne({
+        number: number,
+        repositoryId: mongoose.Types.ObjectId(id),
+      });
+
+      return issue;
+    },
+
     issues: async ({ id }, { after, before, first, states }, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";
