@@ -93,6 +93,7 @@ const typeDefs = gql`
     color: String!
     description: String
     name: String!
+    repositoryId: ID!
   }
 
   input CreateMilestoneInput {

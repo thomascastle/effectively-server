@@ -187,8 +187,12 @@ const resolvers = {
       try {
         const label = await Label.create({
           color: input.color,
-          description: input.description ? input.description : null, // Default to null is the field is not provided
+          description:
+            input.description || input.description === ""
+              ? input.description
+              : null,
           name: input.name,
+          repositoryId: input.repositoryId,
         });
 
         return {
