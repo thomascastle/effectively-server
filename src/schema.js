@@ -100,6 +100,7 @@ const typeDefs = gql`
     description: String
     dueOn: DateTime
     title: String!
+    repositoryId: ID!
   }
 
   input CreateRepositoryInput {

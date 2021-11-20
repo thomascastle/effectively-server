@@ -226,6 +226,7 @@ const resolvers = {
           description: input.description ? input.description : null,
           dueOn: input.dueOn ? input.dueOn : null,
           number: sequenceNumber.value,
+          repositoryId: input.repositoryId,
           title: input.title,
         });
 
