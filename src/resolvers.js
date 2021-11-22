@@ -552,10 +552,13 @@ const resolvers = {
 
         if (milestone) {
           milestone.description =
-            rest.description || rest.description === null
+            rest.description ||
+            rest.description === null ||
+            rest.description === ""
               ? rest.description
               : milestone.description;
-          milestone.dueOn = rest.dueOn ? rest.dueOn : milestone.dueOn;
+          milestone.dueOn =
+            rest.dueOn || rest.dueOn === null ? rest.dueOn : milestone.dueOn;
           milestone.title = rest.title ? rest.title : milestone.title;
 
           const updatedMilestone = await milestone.save();
