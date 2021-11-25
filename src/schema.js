@@ -342,6 +342,12 @@ const typeDefs = gql`
   type User implements RepositoryOwner {
     email: String!
     id: ID!
+    issues(
+      after: String
+      before: String
+      first: Int
+      states: [IssueState!]
+    ): IssueConnection!
     login: String!
     name: String
     repositories: [Repository]
