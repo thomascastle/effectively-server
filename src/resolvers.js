@@ -45,6 +45,12 @@ const resolvers = {
       return milestone;
     },
 
+    repository: async ({ repositoryId }) => {
+      const repository = Repository.findById(repositoryId);
+
+      return repository;
+    },
+
     state: ({ closed }) => {
       return closed ? "CLOSED" : "OPEN";
     },

@@ -219,6 +219,7 @@ const typeDefs = gql`
     labels: [Label]
     milestone: Milestone
     number: Int!
+    repository: Repository!
     state: IssueState!
     title: String!
     updatedAt: DateTime!
