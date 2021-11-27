@@ -2,12 +2,18 @@ const { getUser } = require("./auth/utils");
 const resolvers = require("./resolvers");
 const typeDefs = require("./schema");
 const { ApolloServer, AuthenticationError } = require("apollo-server");
+const dotEnv = require("dotenv");
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://localhost:27017/effectively", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+dotEnv.config();
+
+mongoose.connect(
+  process.env.DB_HOST || "mongodb://localhost:27017/effectively",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 const server = new ApolloServer({
   context: async ({ req }) => {
