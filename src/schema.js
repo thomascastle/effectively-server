@@ -35,15 +35,6 @@ const typeDefs = gql`
   }
 
   type Query {
-    issue(number: Int!): Issue
-
-    issues(
-      after: String
-      before: String
-      first: Int
-      states: [IssueState!]
-    ): IssueConnection
-
     label(name: String!): Label
 
     labels(after: String, before: String, first: Int): LabelConnection
