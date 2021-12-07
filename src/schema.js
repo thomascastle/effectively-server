@@ -65,6 +65,11 @@ const typeDefs = gql`
   }
 
   "-- Application types --"
+  enum IssueOrderField {
+    CREATED_AT
+    UPDATED_AT
+  }
+
   enum IssueState {
     CLOSED
     OPEN
@@ -73,6 +78,11 @@ const typeDefs = gql`
   enum MilestoneState {
     CLOSED
     OPEN
+  }
+
+  enum OrderDirection {
+    ASC
+    DESC
   }
 
   enum RepositoryVisibility {
@@ -108,6 +118,11 @@ const typeDefs = gql`
     name: String!
     ownerId: ID
     visibility: RepositoryVisibility!
+  }
+
+  input IssueOrder {
+    direction: OrderDirection!
+    field: IssueOrderField!
   }
 
   input LogInInput {
@@ -306,6 +321,7 @@ const typeDefs = gql`
       after: String
       before: String
       first: Int
+      orderBy: IssueOrder
       states: [IssueState!]
     ): IssueConnection
     labels(after: String, before: String, first: Int): LabelConnection
