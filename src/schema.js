@@ -35,8 +35,6 @@ const typeDefs = gql`
   }
 
   type Query {
-    label(name: String!): Label
-
     labels(after: String, before: String, first: Int): LabelConnection
 
     milestone(number: Int!): Milestone
@@ -315,6 +313,7 @@ const typeDefs = gql`
       orderBy: IssueOrder
       states: [IssueState!]
     ): IssueConnection
+    label(name: String!): Label
     labels(after: String, before: String, first: Int): LabelConnection
     milestones(
       after: String

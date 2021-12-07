@@ -115,6 +115,21 @@ const repository = {
     };
   },
 
+  label: async ({ id }, { name }, { user }) => {
+    if (!user) {
+      const msg = "This endpoint requires you to be authenticated.";
+
+      throw new AuthenticationError(msg);
+    }
+
+    const label = await Label.findOne({
+      name: name,
+      repositoryId: mongoose.Types.ObjectId(id),
+    }).exec();
+
+    return label;
+  },
+
   labels: async ({ id }, { after, before, first }, { user }) => {
     if (!user) {
       const msg = "This endpoint requires you to be authenticated.";

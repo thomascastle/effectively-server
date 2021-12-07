@@ -593,18 +593,6 @@ const resolvers = {
   },
 
   Query: {
-    label: async (_, { name }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      const label = await Label.findOne({ name: name }).exec();
-
-      return label;
-    },
-
     labels: async (_, { after, before, first }, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";
