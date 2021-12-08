@@ -3,6 +3,7 @@ const Label = require("../models/Label");
 const Milestone = require("../models/Milestone");
 const User = require("../models/User");
 const { toBase64, toUTF8 } = require("../utils");
+const RepositoryLabels = require("./RepositoryLabels");
 const { AuthenticationError } = require("apollo-server");
 const mongoose = require("mongoose");
 
@@ -130,69 +131,7 @@ const repository = {
     return label;
   },
 
-  labels: async ({ id }, { after, before, first }, { user }) => {
-    if (!user) {
-      const msg = "This endpoint requires you to be authenticated.";
-
-      throw new AuthenticationError(msg);
-    }
-
-    const limit = first !== null && first !== undefined ? first : 10;
-
-    // TODO Find the most efficient way to do it
-    const allLabels = await Label.find({
-      repositoryId: mongoose.Types.ObjectId(id),
-    });
-
-    const cursorBasedLabels = allLabels.reduce(
-      (edges, label) => [
-        ...edges,
-        {
-          cursor: label.name,
-          node: label,
-        },
-      ],
-      []
-    );
-
-    const startIndex = before
-      ? cursorBasedLabels.findIndex((l) => l.cursor === before)
-      : cursorBasedLabels.findIndex((l) => l.cursor === after);
-
-    const limitedLabels = before
-      ? cursorBasedLabels.slice(startIndex - limit, startIndex)
-      : cursorBasedLabels.slice(
-          startIndex !== -1 ? startIndex + 1 : 0,
-          startIndex !== -1 ? limit + startIndex + 1 : limit
-        );
-
-    const indexEndCursor = allLabels.findIndex(
-      (label) => label.name === limitedLabels[limitedLabels.length - 1].cursor
-    );
-    const indexStartCursor = allLabels.findIndex(
-      (label) => label.name === limitedLabels[0].cursor
-    );
-
-    return {
-      edges: limitedLabels,
-      nodes: before
-        ? allLabels.slice(startIndex - limit, startIndex)
-        : allLabels.slice(
-            startIndex !== -1 ? startIndex + 1 : 0,
-            startIndex !== -1 ? limit + startIndex + 1 : limit
-          ),
-      pageInfo: {
-        endCursor:
-          limitedLabels.length > 0
-            ? limitedLabels[limitedLabels.length - 1].cursor
-            : null,
-        hasNextPage: !!allLabels[indexEndCursor + 1],
-        hasPreviousPage: !!allLabels[indexStartCursor - 1],
-        startCursor: limitedLabels.length > 0 ? limitedLabels[0].cursor : null,
-      },
-      totalCount: allLabels.length,
-    };
-  },
+  labels: RepositoryLabels,
 
   milestones: async ({ id }, { after, before, first, states }, { user }) => {
     if (!user) {
@@ -282,7 +221,7 @@ const repository = {
   },
 };
 
-function getCursorPayload(issue, field) {
+function getCursorPayload(issue, field = "createdAt") {
   if (field === "updatedAt") {
     return issue.updatedAt.toISOString();
   }

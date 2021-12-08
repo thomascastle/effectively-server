@@ -35,8 +35,6 @@ const typeDefs = gql`
   }
 
   type Query {
-    labels(after: String, before: String, first: Int): LabelConnection
-
     milestone(number: Int!): Milestone
 
     milestones(
@@ -62,6 +60,11 @@ const typeDefs = gql`
   enum IssueState {
     CLOSED
     OPEN
+  }
+
+  enum LabelOrderField {
+    CREATED_AT
+    NAME
   }
 
   enum MilestoneState {
@@ -112,6 +115,11 @@ const typeDefs = gql`
   input IssueOrder {
     direction: OrderDirection!
     field: IssueOrderField!
+  }
+
+  input LabelOrder {
+    direction: OrderDirection!
+    field: LabelOrderField!
   }
 
   input LogInInput {
@@ -314,7 +322,7 @@ const typeDefs = gql`
       states: [IssueState!]
     ): IssueConnection
     label(name: String!): Label
-    labels(after: String, before: String, first: Int): LabelConnection
+    labels(after: String, before: String, first: Int, orderBy: LabelOrder): LabelConnection
     milestones(
       after: String
       before: String

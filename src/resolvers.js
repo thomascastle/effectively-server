@@ -593,65 +593,6 @@ const resolvers = {
   },
 
   Query: {
-    labels: async (_, { after, before, first }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      const limit = first !== null && first !== undefined ? first : 10;
-
-      // TODO Find the most efficient way to do it
-      const allLabels = await Label.find().exec();
-
-      const cursorBasedLabels = allLabels.reduce(
-        (edges, label) => [
-          ...edges,
-          {
-            cursor: label.name,
-            node: label,
-          },
-        ],
-        []
-      );
-
-      const startIndex = before
-        ? cursorBasedLabels.findIndex((l) => l.cursor === before)
-        : cursorBasedLabels.findIndex((l) => l.cursor === after);
-
-      const limitedLabels = before
-        ? cursorBasedLabels.slice(startIndex - limit, startIndex)
-        : cursorBasedLabels.slice(
-            startIndex !== -1 ? startIndex + 1 : 0,
-            startIndex !== -1 ? limit + startIndex + 1 : limit
-          );
-
-      const indexEndCursor = allLabels.findIndex(
-        (label) => label.name === limitedLabels[limitedLabels.length - 1].cursor
-      );
-      const indexStartCursor = allLabels.findIndex(
-        (label) => label.name === limitedLabels[0].cursor
-      );
-
-      return {
-        edges: limitedLabels,
-        nodes: before
-          ? allLabels.slice(startIndex - limit, startIndex)
-          : allLabels.slice(
-              startIndex !== -1 ? startIndex + 1 : 0,
-              startIndex !== -1 ? limit + startIndex + 1 : limit
-            ),
-        pageInfo: {
-          endCursor: limitedLabels[limitedLabels.length - 1].cursor,
-          hasNextPage: !!allLabels[indexEndCursor + 1],
-          hasPreviousPage: !!allLabels[indexStartCursor - 1],
-          startCursor: limitedLabels[0].cursor,
-        },
-        totalCount: allLabels.length,
-      };
-    },
-
     milestone: async (_, { number }, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";
