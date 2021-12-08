@@ -1,5 +1,6 @@
 const Label = require("../models/Label");
 const { toBase64, toUTF8 } = require("../utils");
+const { AuthenticationError } = require("apollo-server");
 const mongoose = require("mongoose");
 
 module.exports = async function labels(
