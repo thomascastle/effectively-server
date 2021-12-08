@@ -4,6 +4,7 @@ const RepositoryIssue = require("./RepositoryIssue");
 const RepositoryIssues = require("./RepositoryIssues");
 const RepositoryLabel = require("./RepositoryLabel");
 const RepositoryLabels = require("./RepositoryLabels");
+const RepositoryMilestone = require("./RepositoryMilestone");
 const { AuthenticationError } = require("apollo-server");
 const mongoose = require("mongoose");
 
@@ -19,6 +20,8 @@ const repository = {
   label: RepositoryLabel,
 
   labels: RepositoryLabels,
+
+  milestone: RepositoryMilestone,
 
   milestones: async ({ id }, { after, before, first, states }, { user }) => {
     if (!user) {

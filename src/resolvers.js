@@ -593,18 +593,6 @@ const resolvers = {
   },
 
   Query: {
-    milestone: async (_, { number }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      const milestone = await Milestone.findOne({ number: number }).exec();
-
-      return milestone;
-    },
-
     milestones: async (_, { after, before, first, states }, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";
