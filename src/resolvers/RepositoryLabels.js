@@ -80,7 +80,7 @@ function cursorFilters(
 ) {
   if (preposition === "before") {
     return direction === 1
-      ? { $lt: parseAccordingly(toUFT8(cursor), field) }
+      ? { $lt: parseAccordingly(toUTF8(cursor), field) }
       : { $gt: parseAccordingly(toUTF8(cursor), field) };
   }
 

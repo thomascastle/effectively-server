@@ -35,13 +35,6 @@ const typeDefs = gql`
   }
 
   type Query {
-    milestones(
-      after: String
-      before: String
-      first: Int
-      states: [MilestoneState!]
-    ): MilestoneConnection
-
     repository(name: String!, owner: String!): Repository
 
     users: [User]
@@ -63,6 +56,12 @@ const typeDefs = gql`
   enum LabelOrderField {
     CREATED_AT
     NAME
+  }
+
+  enum MilestoneOrderField {
+    CREATED_AT
+    NUMBER
+    UPDATED_AT
   }
 
   enum MilestoneState {
@@ -123,6 +122,11 @@ const typeDefs = gql`
   input LogInInput {
     email: String!
     password: String!
+  }
+
+  input MilestoneOrder {
+    direction: OrderDirection!
+    field: MilestoneOrderField!
   }
 
   input SignUpInput {
@@ -331,6 +335,7 @@ const typeDefs = gql`
       after: String
       before: String
       first: Int
+      orderBy: MilestoneOrder
       states: [MilestoneState!]
     ): MilestoneConnection
     name: String!
