@@ -193,7 +193,7 @@ const resolvers = {
 
       try {
         const label = await Label.create({
-          color: input.color,
+          color: input.color.slice(input.color.indexOf("#") + 1),
           description:
             input.description || input.description === ""
               ? input.description
@@ -517,7 +517,9 @@ const resolvers = {
         const label = await Label.findById(id).exec();
 
         if (label) {
-          label.color = rest.color ? rest.color : label.color;
+          label.color = rest.color
+            ? rest.color.slice(rest.color.indexOf("#") + 1)
+            : label.color;
           label.description =
             rest.description || rest.description === null
               ? rest.description
