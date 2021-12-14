@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const schema = new mongoose.Schema(
   {
     description: { type: String },
-    name: { required: true, type: String },
+    name: { minLength: 1, required: true, type: String },
     ownerId: { required: true, type: mongoose.SchemaTypes.ObjectId },
     visibility: { required: true, type: String },
   },

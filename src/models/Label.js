@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const schema = new mongoose.Schema(
   {
-    color: { required: true, type: String, unique: true },
-    description: String,
+    color: { required: true, type: String },
+    description: { type: String },
     name: { required: true, type: String },
     repositoryId: {
       ref: "Repository",
@@ -15,6 +15,8 @@ const schema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+schema.index({ repositoryId: 1, name: 1 }, { unique: true });
 
 const Label = mongoose.model("Label", schema);
 

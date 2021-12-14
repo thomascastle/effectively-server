@@ -7,13 +7,13 @@ const typeDefs = gql`
 
     closeMilestone(id: ID!): CloseMilestoneResponse
 
-    createIssue(input: CreateIssueInput): CreateIssueResponse
+    createIssue(input: CreateIssueInput!): CreateIssueResponse
 
-    createLabel(input: CreateLabelInput): CreateLabelResponse
+    createLabel(input: CreateLabelInput!): CreateLabelResponse
 
-    createMilestone(input: CreateMilestoneInput): CreateMilestoneResponse
+    createMilestone(input: CreateMilestoneInput!): CreateMilestoneResponse
 
-    createRepository(input: CreateRepositoryInput): CreateRepositoryPayload
+    createRepository(input: CreateRepositoryInput!): CreateRepositoryPayload
 
     deleteIssue(id: ID!): DeleteIssueResponse
 
@@ -27,11 +27,11 @@ const typeDefs = gql`
 
     signup(input: SignUpInput): AuthPayload
 
-    updateIssue(input: UpdateIssueInput): UpdateIssueResponse
+    updateIssue(input: UpdateIssueInput!): UpdateIssueResponse
 
-    updateLabel(input: UpdateLabelInput): UpdateLabelResponse
+    updateLabel(input: UpdateLabelInput!): UpdateLabelResponse
 
-    updateMilestone(input: UpdateMilestoneInput): UpdateMilestoneResponse
+    updateMilestone(input: UpdateMilestoneInput!): UpdateMilestoneResponse
   }
 
   type Query {

@@ -3,10 +3,15 @@ const Issue = require("./models/Issue");
 const Label = require("./models/Label");
 const Milestone = require("./models/Milestone");
 const Repository = require("./models/Repository");
-const SequenceNumber = require("./models/SequenceNumber");
 const User = require("./models/User");
+const createIssue = require("./resolvers/CreateIssue");
+const createLabel = require("./resolvers/CreateLabel");
+const createMilestone = require("./resolvers/CreateMilestone");
+const updateIssue = require("./resolvers/UpdateIssue");
+const updateLabel = require("./resolvers/UpdateLabel");
+const updateMilestone = require("./resolvers/UpdateMilestone");
 const RepositoryResolver = require("./resolvers/Repository");
-const { AuthenticationError } = require("apollo-server");
+const { AuthenticationError, UserInputError } = require("apollo-server");
 const bcrypt = require("bcrypt");
 const { GraphQLScalarType } = require("graphql");
 const jwt = require("jsonwebtoken");
@@ -138,124 +143,11 @@ const resolvers = {
       }
     },
 
-    createIssue: async (_, { input }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
+    createIssue: createIssue,
 
-        throw new AuthenticationError(msg);
-      }
+    createLabel: createLabel,
 
-      const sequenceNumber = await SequenceNumber.findOne({
-        entity: "issue",
-      }).exec();
-
-      try {
-        const issue = await Issue.create({
-          assignees: input.assigneeIds ? [...input.assigneeIds] : [],
-          body: input.body || input.body === "" ? input.body : null,
-          closed: false,
-          createdBy: user.id,
-          // TODO closedAt should be null by default
-          // closedAt: null
-          labels: input.labelIds ? [...input.labelIds] : [],
-          milestone: input.milestoneId ? input.milestoneId : null,
-          number: sequenceNumber.value,
-          repositoryId: input.repositoryId,
-          title: input.title,
-        });
-
-        return {
-          message: "A new issue has been created.",
-          success: true,
-          issue: issue,
-        };
-      } catch (error) {
-        return {
-          message: error.message,
-          success: false,
-          issue: null,
-        };
-      } finally {
-        // NOTE Is this a good way to do it — in the "finally"?
-        await SequenceNumber.updateOne(
-          { entity: "issue" },
-          { $inc: { value: 1 } }
-        );
-      }
-    },
-
-    createLabel: async (_, { input }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      try {
-        const label = await Label.create({
-          color: input.color.slice(input.color.indexOf("#") + 1),
-          description:
-            input.description || input.description === ""
-              ? input.description
-              : null,
-          name: input.name,
-          repositoryId: input.repositoryId,
-        });
-
-        return {
-          message: "A new label has been created.",
-          success: true,
-          label: label,
-        };
-      } catch (error) {
-        return {
-          message: error.message,
-          success: false,
-          label: null,
-        };
-      }
-    },
-
-    createMilestone: async (_, { input }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      const sequenceNumber = await SequenceNumber.findOne({
-        entity: "milestone",
-      }).exec();
-
-      try {
-        const milestone = await Milestone.create({
-          closed: false,
-          description: input.description ? input.description : null,
-          dueOn: input.dueOn ? input.dueOn : null,
-          number: sequenceNumber.value,
-          repositoryId: input.repositoryId,
-          title: input.title,
-        });
-
-        return {
-          message: "A new milestone has been created.",
-          success: true,
-          milestone: milestone,
-        };
-      } catch (error) {
-        return {
-          message: error.message,
-          success: false,
-          milestone: null,
-        };
-      } finally {
-        // NOTE Is this a good way to do it — in the "finally"?
-        await SequenceNumber.updateOne(
-          { entity: "milestone" },
-          { $inc: { value: 1 } }
-        );
-      }
-    },
+    createMilestone: createMilestone,
 
     createRepository: async (_, { input }, { user }) => {
       if (!user) {
@@ -278,11 +170,7 @@ const resolvers = {
           success: true,
         };
       } catch (error) {
-        return {
-          message: error.message,
-          repository: null,
-          success: false,
-        };
+        throw new UserInputError(error.message);
       }
     },
 
@@ -458,140 +346,11 @@ const resolvers = {
       };
     },
 
-    updateIssue: async (_, { input: { id, ...rest } }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
+    updateIssue: updateIssue,
 
-        throw new AuthenticationError(msg);
-      }
+    updateLabel: updateLabel,
 
-      try {
-        const issue = await Issue.findById(id).exec();
-
-        if (issue) {
-          issue.assignees = rest.assigneeIds
-            ? [...rest.assigneeIds]
-            : [...issue.assignees];
-          issue.body =
-            rest.body || rest.body === null || rest.body === ""
-              ? rest.body
-              : issue.body;
-          issue.labels = rest.labelIds ? [...rest.labelIds] : [...issue.labels];
-          issue.milestone =
-            rest.milestoneId || rest.milestoneId === null
-              ? rest.milestoneId
-              : issue.milestone;
-          issue.title = rest.title ? rest.title : issue.title;
-
-          const updatedIssue = await issue.save();
-
-          return {
-            message: "The issue has been updated.",
-            success: true,
-            issue: updatedIssue,
-          };
-        } else {
-          return {
-            message: "The issue you were looking for could not be found.",
-            success: false,
-            issue: null,
-          };
-        }
-      } catch (error) {
-        return {
-          message: error.message,
-          success: false,
-          label: null,
-        };
-      }
-    },
-
-    updateLabel: async (_, { input: { id, ...rest } }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      try {
-        const label = await Label.findById(id).exec();
-
-        if (label) {
-          label.color = rest.color
-            ? rest.color.slice(rest.color.indexOf("#") + 1)
-            : label.color;
-          label.description =
-            rest.description || rest.description === null
-              ? rest.description
-              : label.description;
-          label.name = rest.name ? rest.name : label.name;
-
-          const updatedLabel = await label.save();
-
-          return {
-            message: "The label has been updated.",
-            success: true,
-            label: updatedLabel,
-          };
-        } else {
-          return {
-            message: "The label you were looking for could not be found.",
-            success: false,
-            label: null,
-          };
-        }
-      } catch (error) {
-        return {
-          message: error.message,
-          success: false,
-          label: null,
-        };
-      }
-    },
-
-    updateMilestone: async (_, { input: { id, ...rest } }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      try {
-        const milestone = await Milestone.findById(id).exec();
-
-        if (milestone) {
-          milestone.description =
-            rest.description ||
-            rest.description === null ||
-            rest.description === ""
-              ? rest.description
-              : milestone.description;
-          milestone.dueOn =
-            rest.dueOn || rest.dueOn === null ? rest.dueOn : milestone.dueOn;
-          milestone.title = rest.title ? rest.title : milestone.title;
-
-          const updatedMilestone = await milestone.save();
-
-          return {
-            message: "The milestone has been updated.",
-            success: true,
-            milestone: updatedMilestone,
-          };
-        } else {
-          return {
-            message: "The milestone you were looking for could not be found.",
-            success: false,
-            milestone: null,
-          };
-        }
-      } catch (error) {
-        return {
-          message: error.message,
-          success: false,
-          milestone: null,
-        };
-      }
-    },
+    updateMilestone: updateMilestone,
   },
 
   Query: {
