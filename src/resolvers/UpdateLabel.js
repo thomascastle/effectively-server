@@ -49,12 +49,16 @@ module.exports = async (_, { input: { id, ...rest } }, { user }) => {
 };
 
 function validate(input) {
-  const { color } = input;
+  const { color, name } = input;
 
   if (color) {
     if (!/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
       throw new ValidationError("Invalid color code");
     }
+  }
+
+  if (name === "") {
+    throw new ValidationError("Name cannot be blank");
   }
 }
 
