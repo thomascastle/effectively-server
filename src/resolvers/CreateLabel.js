@@ -1,9 +1,5 @@
 const Label = require("../models/Label");
-const {
-  AuthenticationError,
-  UserInputError,
-  ValidationError,
-} = require("apollo-server");
+const { AuthenticationError, UserInputError } = require("apollo-server");
 
 module.exports = async (_, { input }, { user }) => {
   if (!user) {
@@ -35,6 +31,10 @@ module.exports = async (_, { input }, { user }) => {
       throw new UserInputError("Duplicate label name");
     }
 
+    if (error.errors["name"]) {
+      throw new UserInputError("Name cannot be blank");
+    }
+
     throw new UserInputError(error.message);
   }
 };
@@ -42,17 +42,15 @@ module.exports = async (_, { input }, { user }) => {
 function validate(input) {
   const { color } = input;
 
-  if (!/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
-    throw new ValidationError("Invalid color code");
+  if (!/^([0-9A-F]{3}){1,2}$/i.test(color)) {
+    throw new UserInputError("Invalid color code");
   }
 }
 
 function formatColor(value) {
-  const v = value.slice(value.indexOf("#") + 1);
-
-  if (v.length === 3) {
-    return v.split("").reduce((a, c) => a.concat(c.concat(c)), "");
+  if (value.length === 3) {
+    return value.split("").reduce((a, c) => a.concat(c.concat(c)), "");
   }
 
-  return v;
+  return value;
 }
