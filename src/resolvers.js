@@ -7,6 +7,7 @@ const User = require("./models/User");
 const createIssue = require("./resolvers/CreateIssue");
 const createLabel = require("./resolvers/CreateLabel");
 const createMilestone = require("./resolvers/CreateMilestone");
+const issues = require("./resolvers/Issues");
 const updateIssue = require("./resolvers/UpdateIssue");
 const updateLabel = require("./resolvers/UpdateLabel");
 const updateMilestone = require("./resolvers/UpdateMilestone");
@@ -416,79 +417,7 @@ const resolvers = {
   },
 
   User: {
-    issues: async ({ id }, { after, before, first, states }, { user }) => {
-      if (!user) {
-        const msg = "This endpoint requires you to be authenticated.";
-
-        throw new AuthenticationError(msg);
-      }
-
-      const limit = first !== null && first !== undefined ? first : 10;
-      const filters = { createdBy: mongoose.Types.ObjectId(id) };
-
-      if (states) {
-        const stateFilters = states.map((s) => {
-          if (s === "CLOSED") {
-            return true;
-          }
-          return false;
-        });
-        filters.closed = { $in: stateFilters };
-      }
-
-      const filteredIssues = await Issue.find(filters);
-
-      const cursorBasedIssues = filteredIssues.reduce(
-        (edges, issue) => [
-          ...edges,
-          {
-            cursor: issue.number,
-            node: issue,
-          },
-        ],
-        []
-      );
-
-      const startIndex = before
-        ? cursorBasedIssues.findIndex((i) => i.cursor.toString() === before)
-        : cursorBasedIssues.findIndex((i) => i.cursor.toString() === after);
-
-      const limitedIssues = before
-        ? cursorBasedIssues.slice(startIndex - limit, startIndex)
-        : cursorBasedIssues.slice(
-            startIndex !== -1 ? startIndex + 1 : 0,
-            startIndex !== -1 ? limit + startIndex + 1 : limit
-          );
-
-      const indexEndCursor = filteredIssues.findIndex(
-        (issue) =>
-          issue.number === limitedIssues[limitedIssues.length - 1].cursor
-      );
-      const indexStartCursor = filteredIssues.findIndex(
-        (issue) => issue.number === limitedIssues[0].cursor
-      );
-
-      return {
-        edges: limitedIssues,
-        nodes: before
-          ? filteredIssues.slice(startIndex - limit, startIndex)
-          : filteredIssues.slice(
-              startIndex !== -1 ? startIndex + 1 : 0,
-              startIndex !== -1 ? limit + startIndex + 1 : limit
-            ),
-        pageInfo: {
-          endCursor:
-            limitedIssues.length > 0
-              ? limitedIssues[limitedIssues.length - 1].cursor
-              : null,
-          hasNextPage: !!filteredIssues[indexEndCursor + 1],
-          hasPreviousPage: !!filteredIssues[indexStartCursor - 1],
-          startCursor:
-            limitedIssues.length > 0 ? limitedIssues[0].cursor : null,
-        },
-        totalCount: filteredIssues.length,
-      };
-    },
+    issues: issues,
 
     login: ({ username }) => {
       return username;
