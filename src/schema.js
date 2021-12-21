@@ -370,6 +370,7 @@ const typeDefs = gql`
       after: String
       before: String
       first: Int
+      orderBy: IssueOrder
       states: [IssueState!]
     ): IssueConnection!
     login: String!
