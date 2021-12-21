@@ -1,4 +1,6 @@
 const Issue = require("../models/Issue");
+const Label = require("../models/Label");
+const Repository = require("../models/Repository");
 const { toBase64, toUTF8 } = require("../utils");
 const { AuthenticationError } = require("apollo-server");
 const mongoose = require("mongoose");
@@ -7,7 +9,7 @@ const mongoose = require("mongoose");
 // TODO Reuse
 module.exports = async (
   { id },
-  { after, before, first, orderBy, states },
+  { after, before, first, labels: labelNames, orderBy, states },
   { user }
 ) => {
   if (!user) {
@@ -20,6 +22,18 @@ module.exports = async (
   const field = orderField(orderBy);
   const filters = { createdBy: mongoose.Types.ObjectId(id) };
   const limit = first !== null && first !== undefined ? first : 10;
+
+  if (labelNames) {
+    const repositoryFilters = await Repository.find({
+      createdBy: mongoose.Types.ObjectId(id),
+    }).select("id");
+    const labelFilters = await Label.find({
+      name: { $in: labelNames },
+      repositoryId: { $in: repositoryFilters },
+    }).select("id");
+
+    filters.labels = { $in: labelFilters };
+  }
 
   if (states) {
     const stateFilters = states.map((s) => {

@@ -1,11 +1,12 @@
 const Issue = require("../models/Issue");
+const Label = require("../models/Label");
 const { toBase64, toUTF8 } = require("../utils");
 const { AuthenticationError } = require("apollo-server");
 const mongoose = require("mongoose");
 
 module.exports = async function issues(
   { id },
-  { after, before, first, orderBy, states },
+  { after, before, first, labels: labelNames, orderBy, states },
   { user }
 ) {
   if (!user) {
@@ -18,6 +19,15 @@ module.exports = async function issues(
   const field = orderField(orderBy);
   const filters = { repositoryId: mongoose.Types.ObjectId(id) };
   const limit = first !== null && first !== undefined ? first : 10;
+
+  if (labelNames) {
+    const labelFilters = await Label.find({
+      name: { $in: labelNames },
+      repositoryId: mongoose.Types.ObjectId(id),
+    }).select("id");
+
+    filters.labels = { $in: labelFilters };
+  }
 
   if (states) {
     const stateFilters = states.map((s) => {

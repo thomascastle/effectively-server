@@ -320,6 +320,7 @@ const typeDefs = gql`
       after: String
       before: String
       first: Int
+      labels: [String!]
       orderBy: IssueOrder
       states: [IssueState!]
     ): IssueConnection
@@ -370,6 +371,7 @@ const typeDefs = gql`
       after: String
       before: String
       first: Int
+      labels: [String!]
       orderBy: IssueOrder
       states: [IssueState!]
     ): IssueConnection!
