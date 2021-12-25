@@ -279,6 +279,14 @@ const typeDefs = gql`
     description: String
     dueOn: DateTime
     id: ID!
+    issues(
+      after: String
+      before: String
+      first: Int
+      labels: [String!]
+      orderBy: IssueOrder
+      states: [IssueState!]
+    ): IssueConnection!
     number: Int!
     state: MilestoneState!
     title: String!

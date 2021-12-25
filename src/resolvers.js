@@ -8,6 +8,7 @@ const createIssue = require("./resolvers/CreateIssue");
 const createLabel = require("./resolvers/CreateLabel");
 const createMilestone = require("./resolvers/CreateMilestone");
 const issues = require("./resolvers/Issues");
+const MilestoneResolver = require("./resolvers/Milestone");
 const updateIssue = require("./resolvers/UpdateIssue");
 const updateLabel = require("./resolvers/UpdateLabel");
 const updateMilestone = require("./resolvers/UpdateMilestone");
@@ -63,11 +64,7 @@ const resolvers = {
     },
   },
 
-  Milestone: {
-    state: ({ closed }) => {
-      return closed ? "CLOSED" : "OPEN";
-    },
-  },
+  Milestone: MilestoneResolver,
 
   Mutation: {
     closeIssue: async (_, { id }, { user }) => {
