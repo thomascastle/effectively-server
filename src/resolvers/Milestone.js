@@ -11,7 +11,7 @@ module.exports = {
     const countAll = await Issue.find(filters).count();
     const countClosed = await Issue.find({ ...filters, closed: true }).count();
 
-    return (countClosed / countAll) * 100;
+    return countAll > 0 ? (countClosed / countAll) * 100 : 0;
   },
 
   state: ({ closed }) => {
