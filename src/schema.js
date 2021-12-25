@@ -288,6 +288,7 @@ const typeDefs = gql`
       states: [IssueState!]
     ): IssueConnection!
     number: Int!
+    progressPercentage: Float!
     state: MilestoneState!
     title: String!
     updatedAt: DateTime
