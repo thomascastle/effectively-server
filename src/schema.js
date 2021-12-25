@@ -323,7 +323,7 @@ const typeDefs = gql`
       labels: [String!]
       orderBy: IssueOrder
       states: [IssueState!]
-    ): IssueConnection
+    ): IssueConnection!
     label(name: String!): Label
     labels(
       after: String
