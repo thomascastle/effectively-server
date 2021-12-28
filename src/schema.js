@@ -109,6 +109,12 @@ const typeDefs = gql`
     visibility: RepositoryVisibility!
   }
 
+  input IssueFilters {
+    assignee: String
+    createdBy: String
+    mentioned: String
+  }
+
   input IssueOrder {
     direction: OrderDirection!
     field: IssueOrderField!
@@ -282,6 +288,7 @@ const typeDefs = gql`
     issues(
       after: String
       before: String
+      filterBy: IssueFilters
       first: Int
       labels: [String!]
       orderBy: IssueOrder
@@ -328,6 +335,7 @@ const typeDefs = gql`
     issues(
       after: String
       before: String
+      filterBy: IssueFilters
       first: Int
       labels: [String!]
       orderBy: IssueOrder
@@ -379,6 +387,7 @@ const typeDefs = gql`
     issues(
       after: String
       before: String
+      filterBy: IssueFilters
       first: Int
       labels: [String!]
       orderBy: IssueOrder
