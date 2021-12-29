@@ -381,6 +381,18 @@ const resolvers = {
       return repository;
     },
 
+    user: async (_, { login }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      const u = await User.findOne({ username: login });
+
+      return u;
+    },
+
     users: async (parent, args, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";

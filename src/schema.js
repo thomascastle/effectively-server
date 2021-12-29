@@ -37,6 +37,8 @@ const typeDefs = gql`
   type Query {
     repository(name: String!, owner: String!): Repository
 
+    user(login: String!): User
+
     users: [User]
 
     viewer: User!
