@@ -76,6 +76,17 @@ const typeDefs = gql`
     DESC
   }
 
+  enum RepositoryOrderField {
+    CREATED_AT
+    NAME
+    UPDATED_AT
+  }
+
+  enum RepositoryPrivacy {
+    PRIVATE
+    PUBLIC
+  }
+
   enum RepositoryVisibility {
     PRIVATE
     PUBLIC
@@ -137,6 +148,11 @@ const typeDefs = gql`
     field: MilestoneOrderField!
   }
 
+  input RepositoryOrder {
+    direction: OrderDirection!
+    field: RepositoryOrderField!
+  }
+
   input SignUpInput {
     email: String!
     password: String!
@@ -168,7 +184,13 @@ const typeDefs = gql`
 
   interface RepositoryOwner {
     login: String!
-    repositories: [Repository]
+    repositories(
+      after: String
+      before: String
+      first: Int
+      orderBy: RepositoryOrder
+      privacy: RepositoryPrivacy
+    ): RepositoryConnection!
     repository(name: String!): Repository
   }
 
@@ -365,6 +387,18 @@ const typeDefs = gql`
     visibility: RepositoryVisibility!
   }
 
+  type RepositoryConnection {
+    edges: [RepositoryEdge]
+    nodes: [Repository]
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
+  type RepositoryEdge {
+    cursor: String!
+    node: Repository
+  }
+
   type UpdateIssueResponse {
     message: String!
     success: Boolean!
@@ -397,7 +431,13 @@ const typeDefs = gql`
     ): IssueConnection!
     login: String!
     name: String
-    repositories: [Repository]
+    repositories(
+      after: String
+      before: String
+      first: Int
+      orderBy: RepositoryOrder
+      privacy: RepositoryPrivacy
+    ): RepositoryConnection!
     repository(name: String!): Repository
   }
 `;

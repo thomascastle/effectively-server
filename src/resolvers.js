@@ -7,12 +7,12 @@ const User = require("./models/User");
 const createIssue = require("./resolvers/CreateIssue");
 const createLabel = require("./resolvers/CreateLabel");
 const createMilestone = require("./resolvers/CreateMilestone");
-const issues = require("./resolvers/Issues");
 const MilestoneResolver = require("./resolvers/Milestone");
 const updateIssue = require("./resolvers/UpdateIssue");
 const updateLabel = require("./resolvers/UpdateLabel");
 const updateMilestone = require("./resolvers/UpdateMilestone");
 const RepositoryResolver = require("./resolvers/Repository");
+const UserResolver = require("./resolvers/User");
 const { AuthenticationError, UserInputError } = require("apollo-server");
 const bcrypt = require("bcrypt");
 const { GraphQLScalarType } = require("graphql");
@@ -425,30 +425,7 @@ const resolvers = {
     },
   },
 
-  User: {
-    issues: issues,
-
-    login: ({ username }) => {
-      return username;
-    },
-
-    repository: async ({ id }, { name }) => {
-      const repository = await Repository.findOne({
-        name: name,
-        ownerId: mongoose.Types.ObjectId(id),
-      });
-
-      return repository;
-    },
-
-    repositories: async ({ id }) => {
-      const repositories = await Repository.find({
-        ownerId: mongoose.Types.ObjectId(id),
-      });
-
-      return repositories;
-    },
-  },
+  User: UserResolver,
 };
 
 module.exports = resolvers;
