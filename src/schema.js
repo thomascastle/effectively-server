@@ -23,6 +23,8 @@ const typeDefs = gql`
 
     login(input: LogInInput): AuthPayload
 
+    reopenIssue(id: ID!): ReopenIssuePayload
+
     reopenMilestone(id: ID!): ReopenMilestoneResponse
 
     signup(input: SignUpInput): AuthPayload
@@ -342,6 +344,10 @@ const typeDefs = gql`
     hasNextPage: Boolean!
     hasPreviousPage: Boolean!
     startCursor: String
+  }
+
+  type ReopenIssuePayload {
+    issue: Issue
   }
 
   type ReopenMilestoneResponse {

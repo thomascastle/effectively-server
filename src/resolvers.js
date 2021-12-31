@@ -288,6 +288,35 @@ const resolvers = {
       };
     },
 
+    reopenIssue: async (_, { id }, { user }) => {
+      if (!user) {
+        const msg = "This endpoint requires you to be authenticated.";
+
+        throw new AuthenticationError(msg);
+      }
+
+      try {
+        const issue = await Issue.findById(id);
+
+        if (issue) {
+          issue.closed = false;
+          issue.closedAt = null;
+
+          const reopenedIssue = await issue.save();
+
+          return {
+            issue: reopenedIssue,
+          };
+        } else {
+          return {
+            issue: null,
+          };
+        }
+      } catch (error) {
+        return new Error(error.message);
+      }
+    },
+
     reopenMilestone: async (_, { id }, { user }) => {
       if (!user) {
         const msg = "This endpoint requires you to be authenticated.";
